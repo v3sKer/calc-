@@ -1,108 +1,123 @@
-// Initializing section
-const display = document.querySelector('#calc-display');
+/*
+  CALL UPDATE DISPLAY
 
-let currentOperand = 1;
-let firstOperand = [];
-let secondOperand = [];
-let operator;
+  Listen every button of calculator
+    CALL USER INPUT with pressed button
 
-let numbersFilter = '0123456789';
-let operatorsFilter = ['divide', 'multiply', 'minus', 'plus'];
-let toolsFilter = ['clear', 'negative', 'percent', 'dot']
+  let firstOperand = [];
+  let secondOperand = [];
+  let currentOperandValue = [];
 
-// Display section
+  let firstOperator = null;
+  let secondOperator = null;
 
-function updateDisplay(value) {
-  if (typeof value === 'object') {
-    display.textContent = value.slice().join('');
+________________________________________________________________________________
+  USER INPUT (button)
+
+    ENABLE previously disabled operators
+
+    IF pressed button is a number
+      IF number value > 0
+        Add pressed number value to currentOperandValue
+      IF number value === 0
+        IF currentOperandValue length === 0
+          Add 0 to currentOperandValue
+        IF currentOperandValue length = 1 and currentOperandValue[0] === 0
+          ALERT 'cannot add more zeros'
+        IF currentOperandValue length >= 1 and currentOperandValue[0] !== 0
+          Add 0 to currentOperandValue
+        
+    IF pressed button is an operator
+      DISABLE pressed operator (preventing stuff)
+      IF firstOperator is null
+        Add pressed operator value to firstOperator
+        
+        Attribute currentOperandValue as firstOperand
+        Clear currentOperandValue
+      IF first operator is not null
+        IF currentOperandValue length > 0
+          Attribute currentOperandValue as secondOperand
+          Clear currentOperandValue
+
+          Add pressed operator to secondOperator
+          Call MATH function with (firstOperand, firstOperator, secondOperand)
+          Attribute MATH result as firstOperand
+          Attribute second operator as first operator
+          Clear secondOperand
+          Clear secondOperator
+        IF second operand length === 0
+          ALERT 'before selecting next operator please fill second operand'
+
+
+    IF pressed button is 'equal'
+      IF firstOperator !== null
+        Attribute currentOperandValue as secondOperand
+        clear currentOperandValue
+
+        CALL MATH with (firstOperand, firstOperator, secondOperand)
+        Attribute MATH result as firstOperand
+        Clean firstOperator, secondOperand
+      ELSE 
+
+
+    IF pressed button is 'dot'
+      IF current operand already has a dot
+        ALERT 'cannot add decimal point to already decimal value'
+      ELSE
+        ADD dot to current operand
+
+
+    IF pressed button is 'percent'
+      IF current operand is second operand
+        ALERT 'cannot perform percent operation before equality'
+      IF current operand is first operand
+        DISPLAY (validated first operand / 100)
+
+    IF pressed button is 'negative'
+      
+
+    CALL UPDATE_DISPLAY
+________________________________________________________________________________
+
+
+________________________________________________________________________________
+  MATH FUNCTION (first operand, operator, second operand)
+
+    LET a be VALIDATE first operand
+    LET b be VALIDATE second operand
+    LET result
+
+    IF operator is '+' - result = a+b
+    IF operator is '-' - result = a-b
+    IF operator is '×' - result = a*b
+    IF operator is '/'
+      IF a or b is 0
+        DISPLAY 'bro divided by 0..'
+      IF a and b is not 0
+        result = a/b
     
-  } else {
-    display.textContent = value;
-  }
-}
+    RETURN result as a separated array
+________________________________________________________________________________
 
-updateDisplay(validate(firstOperand));
 
-// User input section
-const allButtons = [...document.querySelectorAll('button')];
-allButtons.map(button => button.addEventListener('click', button => {getUserInput(button)}))
+________________________________________________________________________________
+  VALIDATION FUNCTION (array)
 
-function getUserInput(button) {
-  let input = button.target.closest('button').dataset.value;
+    IF array length > 0
+      RETURN array joined copy
+    IF array length === 0
+      RETURN 0
+________________________________________________________________________________
 
-  // Numbers
-  if (numbersFilter.includes(input)) {
-    if (currentOperand === 1) {
-      if (input == 0){
-        if (firstOperand.length > 0) {
-          firstOperand.push(input);
-          updateDisplay(firstOperand);
-        }
-      } else {
-        firstOperand.push(input);
-        updateDisplay(firstOperand);
-      }
-    } else if (currentOperand === 2) {
-      if (input == 0){
-        if (secondOperand.length > 0) {
-          secondOperand.push(input);
-          updateDisplay(secondOperand);
-        }
-      } else {
-        secondOperand.push(input);
-        updateDisplay(secondOperand);
-      }
-    } 
 
-  // Operators
-  } else if (operatorsFilter.includes(input)) {
-    if (currentOperand === 1) {
-      currentOperand++;
-      operator = input;
-    } else if (currentOperand === 2){
-      let result = doMath(validate(firstOperand), validate(secondOperand), operator);
-      updateDisplay(result);
-      firstOperand = [...result.toString()].map(Number);
-      secondOperand = [];
-      operator = input;
-    } 
+________________________________________________________________________________
+  UPDATE DISPLAY 
 
-  // Tools
-  } else if (toolsFilter.includes(input)) {
-    if (input === 'clear') {
-      firstOperand = [];
-      secondOperand = [];
-      currentOperand = 1;
-      updateDisplay(validate(firstOperand));
-    }
-
-  } else if (input == 'equals') {
-    if (currentOperand == 2) {
-      let result = doMath(validate(firstOperand), validate(secondOperand), operator);
-      updateDisplay(result);
-      firstOperand = [...result.toString()].map(Number);
-      secondOperand = [];
-    }
-  }
-}
-
-function validate(item) {
-  let length = item.length;
-  let validated = item.slice().join('');
-  return (length > 0) ? validated : 0;
-}
-
-function doMath(firstOperand, secondOperand, operator) {
-  let a = parseInt(firstOperand);
-  let b = parseInt(secondOperand);
-
-  let result = (operator === 'plus') ? a + b 
-    : (operator === 'minus') ? a - b
-    : (operator === 'multiply') ? a * b
-    : (operator === 'divide') ? 
-      (a > 0 && b > 0) ? a / b
-      : `bro...`
-    : 'calc error'
-
-    return (typeof result === 'number') ? result.toFixed(2) : result;
-}
+    IF current operand is first
+      DISPLAY validated current operand
+    IF current operand is second
+      DISPLAY validated first operand
+      DISPLAY first operator
+      DISPLAY validated second operand
+________________________________________________________________________________
+*/

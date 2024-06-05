@@ -1,124 +1,166 @@
-/*
-  CALL UPDATE DISPLAY
+let firstOperand = [];
+let secondOperand = [];
+let currentOperandValue = [];
 
-  Listen every button of calculator
-    CALL USER INPUT with pressed button
+let firstOperator = null;
+let secondOperator = null;
 
-  let firstOperand = [];
-  let secondOperand = [];
-  let currentOperandValue = [];
+const display = document.querySelector('#calc-display');
+const buttons = [...document.querySelectorAll('button')];
+buttons.map(button => button.addEventListener('click', button => getUserInput(button)));
 
-  let firstOperator = null;
-  let secondOperator = null;
+// Filters
+const numbers = '1234567890';
+const operators = ['/', '×', '+', '-'];
 
-________________________________________________________________________________
-  USER INPUT (button)
+updateDisplay();
 
-    ENABLE previously disabled operators
+// USER INPUT FUNCTION
+function getUserInput(button) {
+  let input = button.target.closest('button').dataset.value;
 
-    IF pressed button is a number
-      IF number value > 0
-        Add pressed number value to currentOperandValue
-      IF number value === 0
-        IF currentOperandValue length === 0
-          Add 0 to currentOperandValue
-        IF currentOperandValue length = 1 and currentOperandValue[0] === 0
-          ALERT 'cannot add more zeros'
-        IF currentOperandValue length >= 1 and currentOperandValue[0] !== 0
-          Add 0 to currentOperandValue
-        
-    IF pressed button is an operator
-      DISABLE pressed operator (preventing stuff)
-      IF firstOperator is null
-        Add pressed operator value to firstOperator
-        
-        Attribute currentOperandValue as firstOperand
-        Clear currentOperandValue
-      IF first operator is not null
-        IF currentOperandValue length > 0
-          Attribute currentOperandValue as secondOperand
-          Clear currentOperandValue
+  // Numbers input
+  if (numbers.includes(input)) {
+    if(currentOperandValue.length > 20) {
+      alert('Value too big.');
+      return;
+    }
 
-          Add pressed operator to secondOperator
-          Call MATH function with (firstOperand, firstOperator, secondOperand)
-          Attribute MATH result as firstOperand
-          Attribute second operator as first operator
-          Clear secondOperand
-          Clear secondOperator
-        IF second operand length === 0
-          ALERT 'before selecting next operator please fill second operand'
+    if (currentOperandValue[0] === '-' && currentOperandValue[1] === '0' && currentOperandValue[2] !== '.') {
+      currentOperandValue.splice(1, 1);
+    }
+    if (currentOperandValue[0] === '0' && currentOperandValue[1] !== '.') {currentOperandValue.shift()}
+    if (input !== '0') {currentOperandValue.push(input)}
+    else if (input === '0') {
+      (currentOperandValue.length === 0) ? currentOperandValue.push(input)
+        : (currentOperandValue.length === 1 && currentOperandValue[0] === '0') ? alert('Cannot add more zeros.')
+        : (currentOperandValue.length >= 1 && currentOperandValue[0] !== '0') ? currentOperandValue.push(input)
+        : console.log('Input error.')
+      ;
+    }
+  }
+
+  // Operators input
+  // TODO: DISABLE pressed operator
+  
+  if (operators.includes(input)) {
+    if (firstOperator === null) {
+      firstOperator = input; 
+      attrFirstOperand();
+    }
+    else if (firstOperator !== null) {
+      if (currentOperandValue.length > 0) {
+        secondOperator = input;
+        attrSecondOperand();
+        firstOperand = doMath(firstOperand, firstOperator, secondOperand);
+        firstOperator = secondOperator;
+        secondOperand = [];
+        secondOperator = null;
+      }
+      else if (currentOperandValue.length === 0) {
+        alert('Please give a value to second operand before selecting next operator.');
+      }
+    }
+  }
+
+  if (input === 'equal') {
+    if (firstOperator !== null) {
+      attrSecondOperand();
+      currentOperandValue = doMath(firstOperand, firstOperator, secondOperand);
+      firstOperand = [];
+      firstOperator = null;
+      secondOperand = [];
+    }
+  }
+
+  if (input === 'clear') {
+    firstOperand = [];
+    secondOperand = [];
+    currentOperandValue = [];
+    firstOperator = null;
+    secondOperator = null;
+  }
+
+  if (input === 'dot') {
+    if (currentOperandValue.includes('.')) {
+      alert('Cannot add decimal point to already decimal value.')
+    } else {
+      if (currentOperandValue.length === 0) {
+        currentOperandValue.push('0');
+        currentOperandValue.push('.')
+      } else {
+        currentOperandValue.push('.')
+      }
+    }
+  }
+
+  if (input === 'percent') {
+    (firstOperator === null) ? currentOperandValue = toPercent(currentOperandValue)
+      : alert('Cannot perform percent operation before you do another one.')
+  }
+
+  if (input === 'negative'){
+    if (currentOperandValue.length === 0) {currentOperandValue.unshift('-', '0')}
+    else if (currentOperandValue[0] !== '-') {currentOperandValue.unshift('-')}
+    else {currentOperandValue.shift()};
+  }
+
+  updateDisplay();
+}
+
+function doMath(aArray, operator, bArray) {
+  let a = parseInt(validate(aArray));
+  let b = parseInt(validate(bArray));
+  let result;
+
+  if (operator === '+') result = a + b
+    else if (operator === '-') result = a - b
+    else if (operator === '×') result = a * b
+    else if (operator === '/') {
+      if (a === 0 || b === 0) {
+        alert('Dividing by 0 is prohibited.')
+        firstOperand = [];
+        secondOperand = [];
+        currentOperandValue = [];
+        firstOperator = null;
+        return [];
+      } else if (a !== 0 && b !== 0) result = a / b;
+    };
+  return result.toFixed(2).split('')
+}
+
+function validate(array) {
+  return (array.length > 0) ? array.slice().join('') : 0;
+}
+
+function updateDisplay() {
+  display.removeAttribute('class');
+  let verifyLength = currentOperandValue.concat(firstOperand, firstOperator, currentOperandValue);
+  if (verifyLength.length > 15) {
+    console.log(`${verifyLength.length}`)
+    display.setAttribute('class', 's');
+  }
+
+  if (verifyLength.length > 18) {
+    display.setAttribute('class', 'xs');
+  }
+
+  (firstOperator === null) ? display.textContent = `${validate(currentOperandValue)}`
+    : display.textContent = `${validate(firstOperand)} ${firstOperator} ${validate(currentOperandValue)}`
+}
 
 
-    IF pressed button is 'equal'
-      IF firstOperator !== null
-        Attribute currentOperandValue as secondOperand
-        clear currentOperandValue
+function attrFirstOperand(value = currentOperandValue) {
+  firstOperand = value;
+  currentOperandValue = [];
+}
 
-        CALL MATH with (firstOperand, firstOperator, secondOperand)
-        Attribute MATH result as firstOperand
-        Clean firstOperator, secondOperand
-      ELSE 
+function attrSecondOperand(value = currentOperandValue) {
+  secondOperand = value;
+  currentOperandValue = [];
+}
 
-
-    IF pressed button is 'dot'
-      IF current operand already has a dot
-        ALERT 'cannot add decimal point to already decimal value'
-      ELSE
-        ADD dot to current operand
-
-
-    IF pressed button is 'percent'
-      IF current operand is second operand
-        ALERT 'cannot perform percent operation before equality'
-      IF current operand is first operand
-        DISPLAY (validated first operand / 100)
-
-    IF pressed button is 'negative'
-      
-
-    CALL UPDATE_DISPLAY
-________________________________________________________________________________
-
-
-________________________________________________________________________________
-  MATH FUNCTION (first operand, operator, second operand)
-
-    LET a be VALIDATE first operand
-    LET b be VALIDATE second operand
-    LET result
-
-    IF operator is '+' - result = a+b
-    IF operator is '-' - result = a-b
-    IF operator is '×' - result = a*b
-    IF operator is '/'
-      IF a or b is 0
-        DISPLAY 'bro divided by 0..'
-      IF a and b is not 0
-        result = a/b
-    
-    RETURN result as a separated array
-________________________________________________________________________________
-
-
-________________________________________________________________________________
-  VALIDATION FUNCTION (array)
-
-    IF array length > 0
-      RETURN array joined copy
-    IF array length === 0
-      RETURN 0
-________________________________________________________________________________
-
-
-________________________________________________________________________________
-  UPDATE DISPLAY 
-
-    IF current operand is first
-      DISPLAY validated current operand
-    IF current operand is second
-      DISPLAY validated first operand
-      DISPLAY first operator
-      DISPLAY validated second operand
-________________________________________________________________________________
-*/
-
+function toPercent(value) {
+  let validated = validate(value);
+  return (validated / 100).toString().split('');
+}

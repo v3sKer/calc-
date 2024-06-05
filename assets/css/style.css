@@ -32,6 +32,7 @@ main {
   justify-content: center;
   align-items: center;
   height: 100svh;
+  background-color: #5c5c5c;
 }
 
 .container {
@@ -68,6 +69,14 @@ main {
   font-weight: 400;
   padding: 12px;
   overflow: hidden;
+}
+
+.s {
+  font-size: 3.6rem;
+}
+
+.xs {
+  font-size: 2.8rem;
 }
 
 .button {
